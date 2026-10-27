@@ -120,6 +120,9 @@ def parse_vless_link(link: str) -> tuple[dict, list[str]]:
     warnings: list[str] = []
     for key in sorted(set(params) - KNOWN_PARAMS):
         warnings.append(f"未识别参数 {key}，已忽略")
+    for key in ("spx", "seed"):
+        if params.get(key):
+            warnings.append(f"{key} 扩展参数未映射到 Mihomo")
 
     transport = _first(params, "type").lower() or "tcp"
     if transport not in SUPPORTED_TRANSPORTS:
