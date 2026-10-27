@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+*.spec
+*.yaml
+*.yml
+!tests/fixtures/*.yaml
+!tests/fixtures/*.yml
