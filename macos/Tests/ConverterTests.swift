@@ -87,7 +87,7 @@ final class ConverterTests: XCTestCase {
         XCTAssertTrue(result.errors.isEmpty, "\(result.errors.map(\.message))")
         let yaml = try WhiteSwitcherConverter.export(result, mode: .nodes)
         XCTAssertTrue(yaml.contains("uuid: \"11111111-2222-4333-8444-555555555555\""))
-        XCTAssertTrue(yaml.contains("server:"))
+        XCTAssertTrue(yaml.contains("server: \"2001:db8::1\""))
     }
 
     func testWarningsForUnsupportedRealityExtra() {
