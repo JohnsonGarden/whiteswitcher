@@ -120,7 +120,8 @@ public enum WhiteSwitcherConverter {
               let uuid = normalizedUUID(user) else {
             throw ConversionError("UUID 格式无效，或用户信息格式错误")
         }
-        guard let host = uri.host, !host.isEmpty,
+        let host = (uri.host ?? "").trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+        guard !host.isEmpty,
               !host.unicodeScalars.contains(where: { $0.value < 32 || $0.value == 127 }),
               !host.contains(where: { $0.isWhitespace }) else {
             throw ConversionError("服务器地址缺失或无效")
