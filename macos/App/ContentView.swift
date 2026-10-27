@@ -12,13 +12,20 @@ struct ContentView: View {
     @FocusState private var focusInput: Bool
 
     var body: some View {
-        NavigationSplitView {
+        HSplitView {
             sidebar
-                .navigationSplitViewColumnWidth(min: 330, ideal: 405, max: 530)
-        } detail: {
+                .frame(minWidth: 325, idealWidth: 380, maxWidth: 455)
+                .frame(maxHeight: .infinity)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipped()
+                .accessibilityIdentifier("whiteswitcher.sidebar")
             detail
+                .frame(minWidth: 470, maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(nsColor: .windowBackgroundColor))
+                .clipped()
+                .accessibilityIdentifier("whiteswitcher.detail")
         }
-        .navigationTitle("WhiteSwitcher")
+        .frame(minWidth: 860, minHeight: 560)
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("从剪贴板添加", systemImage: "doc.on.clipboard") {
@@ -38,7 +45,9 @@ struct ContentView: View {
     }
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        GeometryReader { available in
+            ScrollView(.vertical) {
+                VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 5) {
                 Label("VLESS 链接", systemImage: "link")
                     .font(.headline)
@@ -59,13 +68,16 @@ struct ContentView: View {
                     Text("vless://UUID@server:443?...#节点名称")
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
                         .padding(.leading, 12)
                         .padding(.top, 15)
                         .allowsHitTesting(false)
                 }
             }
-            .frame(minHeight: 220)
+            .frame(height: min(320, max(205, available.size.height * 0.4)))
             .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.subtleBorder, lineWidth: 1))
 
             HStack(spacing: 8) {
@@ -103,7 +115,6 @@ struct ContentView: View {
                 metric("错误", count: workspace.result.errors.count)
                 metric("警告", count: workspace.result.warnings.count)
             }
-            Spacer(minLength: 0)
             HStack {
                 Image(systemName: "lock.shield")
                     .accessibilityHidden(true)
@@ -112,7 +123,12 @@ struct ContentView: View {
             .font(.caption2)
             .foregroundStyle(.secondary)
         }
-        .padding(20)
+                .padding(20)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .scrollIndicators(.automatic)
+            .frame(width: available.size.width, height: available.size.height)
+        }
     }
 
     private func metric(_ title: String, count: Int) -> some View {
@@ -129,22 +145,16 @@ struct ContentView: View {
 
     private var detail: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("YAML 预览")
-                        .font(.title3.weight(.semibold))
-                    Text("Mihomo / Clash Meta 兼容配置")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 10) {
+                    previewHeader
+                    Spacer(minLength: 4)
+                    previewButtons
                 }
-                Spacer()
-                Button("生成", systemImage: "arrow.triangle.2.circlepath") { workspace.refresh() }
-                    .help("重新生成（⌘↩）")
-                Button("复制 YAML", systemImage: "doc.on.doc") { workspace.copyYAML() }
-                    .disabled(!workspace.isReady)
-                    .help("复制结果（⇧⌘C）")
-                    .buttonStyle(.borderedProminent)
-                    .tint(.primary)
+                VStack(alignment: .leading, spacing: 10) {
+                    previewHeader
+                    previewButtons
+                }
             }
             .padding(.bottom, 14)
 
@@ -200,7 +210,28 @@ struct ContentView: View {
                     .accessibilityAddTraits(.updatesFrequently)
             }
         }
-        .padding(22)
+        .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var previewHeader: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("YAML 预览").font(.title3.weight(.semibold))
+            Text("Mihomo / Clash Meta 兼容配置")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var previewButtons: some View {
+        HStack(spacing: 8) {
+            Button("生成", systemImage: "arrow.triangle.2.circlepath") { workspace.refresh() }
+                .help("重新生成（⌘↩）")
+            Button("复制 YAML", systemImage: "doc.on.doc") { workspace.copyYAML() }
+                .disabled(!workspace.isReady)
+                .help("复制结果（⇧⌘C）")
+                .buttonStyle(.borderedProminent)
+                .tint(.primary)
+        }
     }
 }

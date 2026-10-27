@@ -89,9 +89,10 @@ struct WhiteSwitcherApp: App {
         WindowGroup("WhiteSwitcher") {
             ContentView()
                 .environmentObject(workspace)
-                .frame(minWidth: 900, minHeight: 600)
+                .frame(minWidth: 860, minHeight: 560)
         }
         .defaultSize(width: 1120, height: 720)
+        .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("打开链接文本…") { workspace.importLinks() }

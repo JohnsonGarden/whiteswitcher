@@ -28,3 +28,10 @@ GUI 需要 macOS/Xcode SDK。原生 `.app` 和 `.dmg` 在 GitHub Actions macOS r
 **签名限制：** 当前流水线只做 ad-hoc 签名，**没有 Apple Developer ID 签名和 Apple 公证**。初次打开可能被 Gatekeeper 拦截；确认下载源可信后，在 Finder 中右键应用点“打开”，或者在“系统设置 → 隐私与安全性”允许打开。不会建议关闭 Gatekeeper 全局防护。正式对外发行需要 Developer ID 证书和 notarization。
 
 **范围限制：** 转换器只负责生成 YAML，不提供节点连通性测试，也不配置系统代理；Reality 服务端与 Mihomo 内核版本的兼容性仍需最终客户端验证。密码和节点密钥请勿放在公开 Issue 或截图中。
+
+## v1.1.1 界面修复
+
+- 使用原生 HSplitView 取代 NavigationSplitView：取消额外的左侧导航占位和标题栏布局干扰。
+- 左侧输入区域有固定宽度约束（325–455pt），整栏可滚动，内容随窗口高度变化，防止左上角越界。
+- YAML 预览标题及按钮在窄窗口下自适应重新布局；窗口采用 macOS 系统统一工具栏。
+- 对照 [`UI-QA.md`](UI-QA.md) 进行真实 macOS 桌面验收。CI 编译通过不等于视觉测试通过。
