@@ -1,0 +1,58 @@
+name: Test and build macOS app
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  swift-tests:
+    name: Swift converter tests (macOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test converter with Swift Package Manager
+        working-directory: macos
+        run: swift test --parallel
+
+  macos-app:
+    name: Build WhiteSwitcher macOS Apple Silicon .app/.dmg
+    needs: swift-tests
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create icon assets
+        run: |
+          python3 -m venv .venv-icons
+          .venv-icons/bin/python -m pip install Pillow
+          .venv-icons/bin/python macos/Scripts/make_icon.py build/WhiteSwitcher.iconset
+          iconutil -c icns build/WhiteSwitcher.iconset -o build/WhiteSwitcher.icns
+      - name: Compile SwiftUI macOS ARM64 app
+        run: |
+          set -euo pipefail
+          APP="dist/WhiteSwitcher.app"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+          cp macos/Scripts/Info.plist "$APP/Contents/Info.plist"
+          cp build/WhiteSwitcher.icns "$APP/Contents/Resources/WhiteSwitcher.icns"
+          xcrun swiftc -O -target arm64-apple-macosx14.0 \
+            macos/Core/Converter.swift macos/App/WhiteSwitcherApp.swift macos/App/ContentView.swift \
+            -framework SwiftUI -framework AppKit -framework UniformTypeIdentifiers \
+            -o "$APP/Contents/MacOS/WhiteSwitcher"
+          codesign --force --sign - "$APP"
+          codesign --verify --strict --verbose=2 "$APP"
+          plutil -lint "$APP/Contents/Info.plist"
+          file "$APP/Contents/MacOS/WhiteSwitcher"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" dist/WhiteSwitcher-macOS-arm64.zip
+          hdiutil create -volname WhiteSwitcher -srcfolder "$APP" -ov -format UDZO dist/WhiteSwitcher-macOS-arm64.dmg
+      - name: Upload macOS packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhiteSwitcher-macOS-AppleSilicon
+          path: |
+            dist/WhiteSwitcher-macOS-arm64.zip
+            dist/WhiteSwitcher-macOS-arm64.dmg
+          if-no-files-found: error
