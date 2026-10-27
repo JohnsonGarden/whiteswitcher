@@ -84,6 +84,11 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(len(warnings), 1)
         self.assertNotIn("topsecret", warnings[0])
 
+    def test_reality_spider_x_warns_instead_of_silent_drop(self):
+        proxy, warnings = parse_vless_link(BASE + "?security=reality&pbk=example&spx=%2F")
+        self.assertIn("reality-opts", proxy)
+        self.assertTrue(any("spx" in item for item in warnings))
+
     def test_full_config_references_existing_groups(self):
         proxies = parse_links(BASE + "#A\n" + BASE + "#B").proxies
         config = yaml.safe_load(export_yaml(proxies))
