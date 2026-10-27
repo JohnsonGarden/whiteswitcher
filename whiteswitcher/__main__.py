@@ -9,6 +9,11 @@ from .core import APP_VERSION, export_yaml, parse_links
 
 
 def main() -> int:
+    # Windows redirected consoles can default to a legacy ANSI code page.
+    # Diagnostics include Chinese text; make CLI piping predictable.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="backslashreplace")
     parser = argparse.ArgumentParser(description="WhiteSwitcher — 离线 VLESS → Mihomo YAML 转换器")
     parser.add_argument("--input", "-i", type=Path, help="含 VLESS 链接的 UTF-8 文件")
     parser.add_argument("--output", "-o", type=Path, help="输出 YAML 文件")
