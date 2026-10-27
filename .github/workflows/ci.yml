@@ -1,0 +1,67 @@
+name: Test and build Windows client
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Unit and CLI tests
+        run: python -m unittest discover -s tests -v
+
+  windows-exe:
+    name: Package Windows x64 EXE
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+      - name: Install build dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Package single EXE
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name WhiteSwitcher run_gui.py
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: WhiteSwitcher-Windows-x64
+          path: dist/WhiteSwitcher.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish release on version tag
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: windows-exe
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: WhiteSwitcher-Windows-x64
+          path: dist
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/WhiteSwitcher.exe --title "WhiteSwitcher ${GITHUB_REF_NAME}" --generate-notes
