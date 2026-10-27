@@ -4,6 +4,9 @@
 
 WhiteSwitcher 是面向 **Windows 10/11 家庭版及其他 x64 桌面版本** 的轻量、离线桌面转换器。
 
+界面采用 **shadcn/ui Neutral 黑白灰视觉风格**：浅色主题默认，右上角可切换深色主题，所有按钮、边框、间距和图标统一为中性色。它是 Python/Tk 原生桌面 UI，对齐 shadcn 的视觉语言，**不内置 React 或 shadcn/ui 组件库**，从而保持免 WebView、免服务的运行形态。
+
+
 > 一行一个 `vless://` 节点链接 → 自动识别 Reality / TLS / WS / gRPC / H2 / HTTP / XHTTP → 预览 → 复制或导出 `.yaml`。
 
 ## 下载并使用
@@ -41,6 +44,14 @@ WhiteSwitcher 是面向 **Windows 10/11 家庭版及其他 x64 桌面版本** �
 
 协议字段参考：[Mihomo VLESS](https://wiki.metacubex.one/en/config/proxies/vless/) · [传输层](https://wiki.metacubex.one/en/config/proxies/transport/) · [TLS/Reality](https://wiki.metacubex.one/en/config/proxies/tls/)。
 
+## 界面与主题
+
+- 默认 **Neutral Light**：接近 shadcn/ui 默认原色调（纯白卡片、极浅灰背景、黑色主操作、细灰边框）。
+- 点击右上角「深色模式」可切换 **Neutral Dark**，输入内容、YAML 预览和选择模式不丢失。
+- 输入编辑器与 YAML 深灰代码面板均采用无衬线/等宽字体；转换警告也只使用黑白灰，不引入彩色状态。
+- 全新黑白双向路由箭头 Logo 同时用于窗口和 Windows EXE 图标。
+- 保持纯原生 Tk 运行：没有额外 WebView 或前端依赖。
+
 ## 本地开发
 
 ```powershell
@@ -64,14 +75,15 @@ Windows 单文件打包：
 
 ```powershell
 python -m pip install -r requirements-build.txt
-pyinstaller --noconfirm --clean --onefile --windowed --name WhiteSwitcher run_gui.py
+python scripts/make_icon.py
+pyinstaller --noconfirm --clean --onefile --windowed --name WhiteSwitcher --icon build/WhiteSwitcher.ico --add-data "build/WhiteSwitcher.png;." run_gui.py
 ```
 
 产物：`dist/WhiteSwitcher.exe`。`Actions` 会在 PR、主分支更新以及手动触发时运行测试，并在 Windows runner 上生成可下载的 EXE。只有推送 `v*` 标签时才会自动创建 Release。
 
 ## 设计取舍
 
-Python 标准库 Tkinter + PyYAML + PyInstaller，优先追求 **可维护、离线、无运行时安装、简单交付**。这是面向单一转换任务的工具，不引入复杂的前端工程、账号体系、代理服务器或多阶段 Spec 流程。
+Python 标准库 Tkinter + PyYAML + PyInstaller；构建时用 Pillow 生成黑白 ICO/PNG 图标（EXE 运行时不依赖 Pillow）。优先追求 **可维护、离线、无运行时安装、简单交付**。这是面向单一转换任务的工具，不引入复杂的前端工程、账号体系、代理服务器或多阶段 Spec 流程。
 
 ## 隐私说明
 
