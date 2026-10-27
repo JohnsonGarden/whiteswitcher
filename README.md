@@ -9,7 +9,12 @@ WhiteSwitcher 是面向 **Windows 10/11 家庭版及其他 x64 桌面版本** �
 
 > 一行一个 `vless://` 节点链接 → 自动识别 Reality / TLS / WS / gRPC / H2 / HTTP / XHTTP → 预览 → 复制或导出 `.yaml`。
 
-## 下载并使用
+
+## macOS 原生版（Apple Silicon）
+
+WhiteSwitcher 现已提供 **macOS 14+ Apple Silicon** 的 SwiftUI 原生客户端（与 Windows Python GUI 独立构建，转换规则保持一致）。支持系统原生窗口、菜单快捷键、文件打开/保存、自动深浅色模式，GitHub Actions 提供 `.app` ZIP 和 `.dmg`。详见 [macOS 使用与构建说明](macos/README.md)。
+
+## Windows 下载并使用
 
 1. 打开仓库的 **Actions → Test and build Windows client**，选择最新成功运行，下载 `WhiteSwitcher-Windows-x64` artifact 并解压；正式版本发布后也可直接从 **Releases** 下载 `WhiteSwitcher.exe`。
 2. 双击 `WhiteSwitcher.exe` 启动，**无需预先安装 Python**。
