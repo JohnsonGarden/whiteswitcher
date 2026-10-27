@@ -47,7 +47,10 @@ jobs:
           plutil -lint "$APP/Contents/Info.plist"
           file "$APP/Contents/MacOS/WhiteSwitcher"
           ditto -c -k --sequesterRsrc --keepParent "$APP" dist/WhiteSwitcher-macOS-arm64.zip
-          hdiutil create -volname WhiteSwitcher -srcfolder "$APP" -ov -format UDZO dist/WhiteSwitcher-macOS-arm64.dmg
+          mkdir -p dist/dmg-root
+          ditto "$APP" dist/dmg-root/WhiteSwitcher.app
+          ln -s /Applications dist/dmg-root/Applications
+          hdiutil create -volname WhiteSwitcher -srcfolder dist/dmg-root -ov -format UDZO dist/WhiteSwitcher-macOS-arm64.dmg
       - name: Upload macOS packages
         uses: actions/upload-artifact@v4
         with:
